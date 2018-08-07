@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BillSplittingPoco\BillSplittingPoco.csproj">
+      <Project>{9369b17b-7735-417e-b540-a646006725ba}</Project>
+      <Name>BillSplittingPoco</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
