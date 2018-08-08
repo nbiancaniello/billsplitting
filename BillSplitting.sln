@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BillSplitting", "BillSplitt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BillSplittingTest", "BillSplittingTest\BillSplittingTest.csproj", "{0C73FA30-EC95-4D92-8318-75BE66699516}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BillSplittingPoco", "BillSplittingPoco\BillSplittingPoco.csproj", "{9369B17B-7735-417E-B540-A646006725BA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{0C73FA30-EC95-4D92-8318-75BE66699516}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C73FA30-EC95-4D92-8318-75BE66699516}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C73FA30-EC95-4D92-8318-75BE66699516}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9369B17B-7735-417E-B540-A646006725BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9369B17B-7735-417E-B540-A646006725BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9369B17B-7735-417E-B540-A646006725BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9369B17B-7735-417E-B540-A646006725BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
