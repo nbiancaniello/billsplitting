@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 
@@ -7,8 +8,8 @@ namespace BillSplitting
 {
     public class FileProcessor
     {
-        static readonly string _doubleOutputPattern = "$##0.00;($##0.00);-\0-";
-        static readonly string _outputFileExtension = ".out";
+        private static readonly string DoubleOutputPattern = ConfigurationManager.AppSettings["doubleOutputPattern"];
+        private static readonly string OutputFileExtension = ConfigurationManager.AppSettings["outputFileExtension"];
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
         public string[] Values { get; set; }
@@ -16,7 +17,7 @@ namespace BillSplitting
         public FileProcessor(string inputFile)
         {
             InputFile = inputFile;
-            OutputFile = Path.Combine(Path.GetDirectoryName(inputFile) + @"\" + Path.GetFileName(inputFile) + _outputFileExtension);
+            OutputFile = Path.Combine(Path.GetDirectoryName(inputFile) + @"\" + Path.GetFileName(inputFile) + OutputFileExtension);
         }
 
         public bool ProcessValues()
@@ -87,7 +88,7 @@ namespace BillSplitting
                     foreach (double total in totalPerMember)
                     {
                         double balance = total - billTotalPerMember;
-                        writer.Write($"{balance.ToString(_doubleOutputPattern)}");
+                        writer.Write($"{balance.ToString(DoubleOutputPattern)}");
                         writer.WriteLine(string.Empty);
                         writer.WriteLine();
                     }

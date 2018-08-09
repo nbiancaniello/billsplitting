@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -7,11 +8,11 @@ namespace BillSplitting
 {
     public static class Validator
     {
-        private static readonly string _validNumericPattern = "[0-9.]";
-        public static readonly string ValidEofCharacter = "0";
+        private static readonly string ValidNumericPattern = ConfigurationManager.AppSettings["validNumericPattern"];
+        public static readonly string ValidEofCharacter = ConfigurationManager.AppSettings["validEofCharacter"];
         public static bool ValidateDataFromInputFile(string[] values)
         {
-            var val = values.Where(v => !Regex.IsMatch(v, _validNumericPattern));
+            var val = values.Where(v => !Regex.IsMatch(v, ValidNumericPattern));
             if (val.Any())
             {
                 throw new InvalidDataException("The input file has non numeric characters.");
