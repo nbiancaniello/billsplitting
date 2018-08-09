@@ -12,20 +12,16 @@ namespace BillSplitting
         {
             try
             {
-                VerifyInputParameter(args);
+                Validator.VerifyInputParameter(args);
                 FileProcessor fileProcessor = new FileProcessor(args[0]);
-                fileProcessor.Values = fileProcessor.RetrieveStrings();
-                if (fileProcessor.ValidateInputFile(values))
+                fileProcessor.Values = fileProcessor.RetrieveDataFromInputFile();
+                if (Validator.ValidateDataFromInputFile(fileProcessor.Values))
                 {
                     fileProcessor.DeleteExistingOutputFile();
-                    fileProcessor.ProcessFile(values);
+                    fileProcessor.ProcessValues();
                     Console.WriteLine(@"The program finished with no errors and the file {0} has been created.",
                         fileProcessor.OutputFile);
-                    Console.ReadLine();
-                }
-                else
-                {
-
+                    Console.ReadKey();
                 }
             }
             catch (IOException ioException)
@@ -40,14 +36,6 @@ namespace BillSplitting
             {
                 Console.WriteLine(systemException);
             }
-        }
-
-        public static void VerifyInputParameter(string[] args)
-        {
-            if (args != null && args.Length != 0 && !string.IsNullOrEmpty(args[0]) &&
-                !string.IsNullOrWhiteSpace(args[0])) return;
-            Console.WriteLine($"Error: No argument has been passed.");
-            throw new ArgumentNullException();
         }
     }
 }

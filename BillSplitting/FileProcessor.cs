@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace BillSplitting
 {
     public class FileProcessor
     {
-        static readonly string _decimalOutputPattern = "$##0.00;($##0.00);-\0-";
+        static readonly string _doubleOutputPattern = "$##0.00;($##0.00);-\0-";
         static readonly string _outputFileExtension = ".out";
         public string InputFile { get; set; }
         public string OutputFile { get; set; }
@@ -20,95 +19,103 @@ namespace BillSplitting
             OutputFile = Path.Combine(Path.GetDirectoryName(inputFile) + @"\" + Path.GetFileName(inputFile) + _outputFileExtension);
         }
 
-        public void ProcessFile(string[] values)
-        {
-            int valuesLength = values.Length;
-            List<decimal> tripTotal = new List<decimal>();
-            for (int i = 0; i < valuesLength; i++)
-            {
-                if (values[i] == "0")
-                {
-                    break;
-                }
-
-                var membersLeft = Int32.Parse(values[i]);
-                decimal amount = 0;
-                for (int j = i + 1; j < valuesLength; j++)
-                {
-                    int billsLoopLength = (j + 1) + Int32.Parse(values[j]);
-                    for (int k = j + 1; k < billsLoopLength; k++)
-                    {
-                        amount += decimal.Parse(values[k]);
-                        i = k;
-                    }
-
-                    tripTotal.Add(amount);
-                    amount = 0;
-                    j = i;
-                    membersLeft--;
-
-                    if (membersLeft == 0)
-                    {
-                        SplitBillAndSave(tripTotal);
-                        tripTotal.Clear();
-                        break;
-                    }
-                }
-            }
-        }
-
-        public string[] RetrieveStrings()
-        {
-            return File.ReadAllLines(InputFile).Where(v => !string.IsNullOrEmpty(v)).ToArray();
-        }
-
-        public bool ValidateInputFile(string[] values)
-        {
-            var val = values.Where(v => !Regex.IsMatch(v, "[0-9.]"));
-            if (val.Any())
-            {
-                return false;
-            }
-
-            if (values[values.Length - 1] != "0")
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public void SplitBillAndSave(List<decimal> totalPerMember)
+        public bool ProcessValues()
         {
             try
             {
-                decimal billTotalPerMember = (totalPerMember.Sum() / totalPerMember.Count());
+                int valuesLength = Values.Length;
+                List<double> tripTotal = new List<double>();
+                for (int i = 0; i < valuesLength; i++)
+                {
+                    if (Values[i] == Validator.ValidEofCharacter)
+                    {
+                        break;
+                    }
+
+                    var membersLeft = Int32.Parse(Values[i]);
+                    double amount = 0;
+                    for (int j = i + 1; j < valuesLength; j++)
+                    {
+                        int billsLoopLength = (j + 1) + Int32.Parse(Values[j]);
+                        for (int k = j + 1; k < billsLoopLength; k++)
+                        {
+                            amount += double.Parse(Values[k]);
+                            i = k;
+                        }
+
+                        tripTotal.Add(amount);
+                        amount = 0;
+                        j = i;
+                        membersLeft--;
+
+                        if (membersLeft == 0)
+                        {
+                            SplitBillAndSave(tripTotal);
+                            tripTotal.Clear();
+                            break;
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new IndexOutOfRangeException($"An error ocurrred while fetching the array of values");
+            }
+        }
+
+        public string[] RetrieveDataFromInputFile()
+        {
+            try
+            {
+                return File.ReadAllLines(InputFile).Where(v => !string.IsNullOrEmpty(v)).ToArray();
+            }
+            catch (FileNotFoundException)
+            {
+                throw new FileNotFoundException($"An error ocurred while trying to read from input file");
+            }
+        }
+
+        public bool SplitBillAndSave(List<double> totalPerMember)
+        {
+            try
+            {
+                double billTotalPerMember = (totalPerMember.Sum() / totalPerMember.Count());
                 using (StreamWriter writer = File.AppendText(OutputFile))
                 {
-                    foreach (decimal total in totalPerMember)
+                    foreach (double total in totalPerMember)
                     {
-                        decimal balance = total - billTotalPerMember;
-                        writer.Write($"{balance.ToString(_decimalOutputPattern)}");
+                        double balance = total - billTotalPerMember;
+                        writer.Write($"{balance.ToString(_doubleOutputPattern)}");
                         writer.WriteLine(string.Empty);
                         writer.WriteLine();
                     }
 
                     writer.WriteLine();
                 }
+
+                return true;
             }
-            catch
+            catch (UnauthorizedAccessException)
             {
-                Console.WriteLine($"Error: a problem occurred while writing to output file.");
-                throw new IOException();
+                throw new UnauthorizedAccessException($"No permissions granted to write to output file.");
             }
-            
         }
 
-        public void DeleteExistingOutputFile()
+        public bool DeleteExistingOutputFile()
         {
-            if (File.Exists(OutputFile))
+            try
             {
-                File.Delete(OutputFile);
+                if (File.Exists(OutputFile))
+                {
+                    File.Delete(OutputFile);
+                }
+                return true;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw new UnauthorizedAccessException($"No permissions granted to handle output file.");
             }
         }
     }
