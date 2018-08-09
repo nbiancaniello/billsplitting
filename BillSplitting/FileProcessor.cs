@@ -20,66 +20,62 @@ namespace BillSplitting
             OutputFile = Path.Combine(Path.GetDirectoryName(inputFile) + @"\" + Path.GetFileName(inputFile) + _outputFileExtension);
         }
 
-        public void ProcessFile()
+        public void ProcessFile(string[] values)
         {
-            try
+            int valuesLength = values.Length;
+            List<decimal> tripTotal = new List<decimal>();
+            for (int i = 0; i < valuesLength; i++)
             {
-                int valuesLength = Values.Length;
-                List<decimal> tripTotal = new List<decimal>();
-                for (int i = 0; i < valuesLength; i++)
+                if (values[i] == "0")
                 {
-                    if (Values[i] == "0")
+                    break;
+                }
+
+                var membersLeft = Int32.Parse(values[i]);
+                decimal amount = 0;
+                for (int j = i + 1; j < valuesLength; j++)
+                {
+                    int billsLoopLength = (j + 1) + Int32.Parse(values[j]);
+                    for (int k = j + 1; k < billsLoopLength; k++)
                     {
-                        break;
+                        amount += decimal.Parse(values[k]);
+                        i = k;
                     }
 
-                    var membersLeft = Int32.Parse(Values[i]);
-                    decimal amount = 0;
-                    for (int j = i + 1; j < valuesLength; j++)
+                    tripTotal.Add(amount);
+                    amount = 0;
+                    j = i;
+                    membersLeft--;
+
+                    if (membersLeft == 0)
                     {
-                        int billsLoopLength = (j + 1) + Int32.Parse(Values[j]);
-                        for (int k = j + 1; k < billsLoopLength; k++)
-                        {
-                            amount += decimal.Parse(Values[k]);
-                            i = k;
-                        }
-
-                        tripTotal.Add(amount);
-                        amount = 0;
-                        j = i;
-                        membersLeft--;
-
-                        if (membersLeft == 0)
-                        {
-                            SplitBillAndSave(tripTotal);
-                            tripTotal.Clear();
-                            break;
-                        }
+                        SplitBillAndSave(tripTotal);
+                        tripTotal.Clear();
+                        break;
                     }
                 }
             }
-            catch (IndexOutOfRangeException)
-            {
-                throw new IndexOutOfRangeException();
-            }
-            
         }
 
-        public void ValidateInputFile()
+        public string[] RetrieveStrings()
         {
-            Values = File.ReadAllLines(InputFile).Where(v => !string.IsNullOrEmpty(v)).ToArray();
+            return File.ReadAllLines(InputFile).Where(v => !string.IsNullOrEmpty(v)).ToArray();
+        }
 
-            if (!CheckForNumericValues())
+        public bool ValidateInputFile(string[] values)
+        {
+            var val = values.Where(v => !Regex.IsMatch(v, "[0-9.]"));
+            if (val.Any())
             {
-                Console.WriteLine($"Error: The file contains non numeric characters.");
-                throw new InvalidDataException();
+                return false;
             }
 
-            if (Values[Values.Length - 1] != "0")
+            if (values[values.Length - 1] != "0")
             {
-                Console.WriteLine($"Error: The file does not contain EOF character (0)");
-                throw new InvalidDataException();
+                return false;
             }
+
+            return true;
         }
 
         public void SplitBillAndSave(List<decimal> totalPerMember)
@@ -106,16 +102,6 @@ namespace BillSplitting
                 throw new IOException();
             }
             
-        }
-
-        public bool CheckForNumericValues()
-        {
-            var val = Values.Where(v => !Regex.IsMatch(v, "[0-9.]"));
-            if (val.Any())
-            {
-                return false;
-            }
-            return true;
         }
 
         public void DeleteExistingOutputFile()

@@ -14,12 +14,19 @@ namespace BillSplitting
             {
                 VerifyInputParameter(args);
                 FileProcessor fileProcessor = new FileProcessor(args[0]);
-                fileProcessor.ValidateInputFile();
-                fileProcessor.DeleteExistingOutputFile();
-                fileProcessor.ProcessFile();
-                Console.WriteLine(@"The program finished with no errors and the file {0} has been created.",
-                    fileProcessor.OutputFile);
-                Console.ReadLine();
+                fileProcessor.Values = fileProcessor.RetrieveStrings();
+                if (fileProcessor.ValidateInputFile(values))
+                {
+                    fileProcessor.DeleteExistingOutputFile();
+                    fileProcessor.ProcessFile(values);
+                    Console.WriteLine(@"The program finished with no errors and the file {0} has been created.",
+                        fileProcessor.OutputFile);
+                    Console.ReadLine();
+                }
+                else
+                {
+
+                }
             }
             catch (IOException ioException)
             {
