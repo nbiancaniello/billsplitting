@@ -13,16 +13,18 @@ namespace BillSplittingTest
         private FileProcessor _fileProcessor;
         private List<double> _totalPerMember;
         private string[] _args;
+        private string[] _outputResult;
 
         [TestInitialize]
         public void Init_Parameters()
         {
-            _args = new[] {@"C:\dev\bill.txt"};
+            _args = new[] {@"C:\dev\test.txt"};
             _fileProcessor = new FileProcessor(_args[0])
             {
                 Values = new [] { "2", "2", "10.50", "9.30", "3", "5.55", "7.20", "6.99", "0" }
             };
-            _totalPerMember = new List<double>(){19.50,19.74};
+            _totalPerMember = new List<double>(){19.80,19.74};
+            _outputResult = new[] {"$0.03","($0.03)"};
         }
 
         [TestMethod]
@@ -57,6 +59,21 @@ namespace BillSplittingTest
         public void TestSplitBillAndSave()
         {
             Assert.IsTrue(_fileProcessor.SplitBillAndSave(_totalPerMember));
+        }
+
+        [TestMethod]
+        public void TestSplitBillAndSaveOutputResult()
+        {
+            TestProcessValues();
+            _fileProcessor.InputFile = @"C:\dev\test.txt.out";
+            string[] result = _fileProcessor.RetrieveDataFromInputFile();
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (result[i] != _outputResult[i])
+                {
+                    Assert.Fail("The values in output file are not correct");
+                }
+            }
         }
 
         [TestMethod]
